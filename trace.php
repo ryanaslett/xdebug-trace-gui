@@ -8,7 +8,7 @@ require 'trace.config.php';
         <style type="text/css">
             @import url('trace.css');
         </style>
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
         <title>Xdebug Trace File Parser</title>
     </head>
     <body>
@@ -115,6 +115,7 @@ require 'trace.config.php';
              */
             $aSumary = array();
             $aSumaryS = array();
+            $idCallStack = array(null);
 
             /**
              * Process all lines
@@ -210,6 +211,7 @@ require 'trace.config.php';
                 {
                     $fullTrace[$id]['timeOnExit'] = $time;
                     $fullTrace[$id]['memoryOnExit'] = $memory;
+                    array_pop($idCallStack);
                     continue;
                 }
 
@@ -225,6 +227,7 @@ require 'trace.config.php';
                     // starting function
                     $fullTrace[$id] = array('level' => $level,
                       'id' => $id,
+                      'parentId' => end($idCallStack),
                       'timeOnEntry' => $time,
                       'memoryOnEntry' => $memory,
                       'function' => $function,
@@ -255,17 +258,20 @@ require 'trace.config.php';
 
                     $lastMemory = $memory;
                     $lastTime = $time;
+                    array_push($idCallStack, $id);
                 }
                 else
                 {
                     $fullTrace[$id]['timeOnExit'] = $time;
                     $fullTrace[$id]['memoryOnExit'] = $memory;
+                    array_pop($idCallStack);
                 }
             }
             ?>
             <table>
                 <tr>
-                    <td>
+                    
+                    <td colspan="2">
                         <?= $traceFile; ?><br />
                         <strong><?= count($fullTrace); ?></strong> function calls in <strong><?php $l = end($fullTrace);
                     echo $l['timeOnEntry']; ?> seconds</strong>, using <strong><?= $l['memoryOnEntry'] ?> MB</strong> of memory.
@@ -275,6 +281,8 @@ require 'trace.config.php';
                     <td style="vertical-align:bottom"><small>in = start func.<br />out = end func.</small></td>
                 </tr>
                 <tr>
+                    <th>ID</th>
+                    <th>Parent</th>
                     <th style="max-width: 70%">Function / File</th>
                     <th style="min-width: 8em;">Line</th>
                     <th style="min-width: 8em;">Time</th>
@@ -292,7 +300,10 @@ require 'trace.config.php';
                       /**
                      */
                     ?>
-                    <tr>
+                    <tr id="call<?php echo $trace['id'];?>" rel="call<?php echo $trace['parentId'];?>"
+                        <?php if ($trace['level'] > 2) { echo 'style="display:none"'; } ?>>
+                        <td><?php echo $trace['id'];?></td>
+                        <td><?php echo $trace['parentId'];?></td>
                         <td style="padding-left:<?php
             if (isset($trace['level']))
             {
@@ -330,7 +341,7 @@ require 'trace.config.php';
                         $userFunction = 'user';
                     }
                                 ?><span class="<?= $userFunction ?>" title="UDF ">&#x261b; </span><?php } ?><strong><?php if (isset($trace['type']) and $trace['type'] == 0)
-                    { ?>\<?php } ?><?= @$trace['function'] ?></strong><ul><?= @$trace['valParms'] ?></ul><br />
+                    { ?>\<?php } ?><a href="#" onclick="toggleSubcalls(this); return false;"><?= @$trace['function'] ?></a></strong><ul><?= @$trace['valParms'] ?></ul><br />
                             <small><?= @$trace['filename'] ?></small>
                             <span class="warning">
                                 <?php
@@ -542,6 +553,13 @@ require 'trace.config.php';
             function showCode(where) {
                 var file = $(where).parent().parent().find('small').text();
                 window.open('trace-code.php?line=' + $(where).text() + '&file=' + file + '#l' + $(where).text(), 'code', 'width=500,height=400,toolbar=no,status=no,menubar=no,scrollbars=yes');
+            }
+            
+            function toggleSubcalls(el) {
+                id = $(el).parents("tr")[0].id;
+                $($(el).parents("tr")[0]).siblings("[rel=" + id + "]").each(function() {
+                    $(this).toggle();
+                });
             }
 
         </script>
