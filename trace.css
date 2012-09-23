@@ -96,3 +96,7 @@ span.Corretge {
 
 tr:nth-child(even) {background: ivory;}
 tr:nth-child(odd) {background: aliceblue;}
+
+#trace li ul {
+    display: none;
+}
