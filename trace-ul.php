@@ -1,8 +1,6 @@
 <?php
 require 'trace.config.php';
 
-set_time_limit(600);
-//error_reporting(0);
 ?>
 <html>
     <head>
@@ -62,7 +60,6 @@ set_time_limit(600);
         /**
          * retrieve the xdebug.trace_format ini set.
          */
-        $xdebug_trace_format = ini_get('xdebug.trace_format');
         $XDEBUG_TRACE_GUI_CUSTOM_NAMESPACE_LEN = strlen(XDEBUG_TRACE_GUI_CUSTOM_NAMESPACE);
 
         $traceFile = $config['directory'] . '/' . $_GET ['file'];
@@ -92,71 +89,14 @@ set_time_limit(600);
         {
 
 
-
-            /**
-             * és una manera molt poc eficient de llegir un arxiu.
-             */
-            //$trace = file_get_contents($traceFile);
-            //$lines = explode("\n", $trace);
-
-
             $previousLevel = 0;
-            $levelIds = array();
-            $ids = 0;
 
-
-            $defFn = get_defined_functions();
-            /**
-             * counter
-             */
-            $jCnt = 0;
-
-            /**
-             * Sumary
-             */
-            $aSumary = array();
-            $aSumaryS = array();
-            $idCallStack = array(null);
-
-            /**
-             * Process all lines
-             */
-            //foreach ($lines as $line)
             echo '<div id="trace">';
             $fh = fopen($traceFile, 'r');
             while ($data = fgetcsv($fh, 0, "\t"))
             {
-                /**
-                 * Add one to the counter
-                 */
-                $jCnt++;
-
                 if (count($data) < 3 ) { continue; }
-//                        $data = explode("\t", $jReadedLine);
                 @list($level, $id, $point, $time, $memory, $function, $type, $file, $filename, $line, $numParms) = $data;
-
-                /**
-                 * if there is params save it
-                 */
-//                        if (isset($numParms) and $numParms > 0)
-//                        {
-//                            $valParms = '';
-//                            for ($i = 11; $i < (11 + $numParms); $i++)
-//                            {
-//                                $valParms .= "<li>" . str_replace('\n',
-//                                                                  '<br />',
-//                                                                  htmlentities($data[$i])) . "</li>\n";
-//                            }
-//                        }
-//                        elseif (!empty($file))
-//                        {
-//                            $valParms = "<li>{$file}</li>";
-//                        }
-//                        else
-//                        {
-//                            $valParms = '';
-//                        }
-
 
                 if ($level > $previousLevel) {
                     if ($level >= 3) { ob_start(); }
@@ -186,380 +126,19 @@ set_time_limit(600);
                     unset($fullTrace[$id]);
                 }
                 $previousLevel = $level;
-                $lastFunction = $function;
                 
-                    continue;
-
-
-
-//                if (!empty($filename) and strpos('eyeOS/Loader', $filename) > 0)
-//                {
-//                    continue;
-//                }
-
-                if ($point == 0)
-                {
-                    // starting function
-                    $fullTrace[$id] = array('level' => $level,
-                      'id' => $id,
-                      'parentId' => end($idCallStack),
-                      'timeOnEntry' => $time,
-                      'memoryOnEntry' => $memory,
-                      'function' => $function,
-                      'type' => $type,
-                      'file' => $file,
-                      'filename' => $filename,
-                      'line' => $line,
-                      'valParms' => $valParms);
-
-                    if (isset($lastMemory) and ($memory - $lastMemory) > $memJump)
-                    {
-                        $fullTrace[$id]['memoryAlert'] = $memory - $lastMemory;
-                    }
-                    else
-                    {
-                        $fullTrace[$id]['memoryAlert'] = false;
-                    }
-
-
-                    if (isset($lastMemory) and ($time - $lastTime) > $timeJump)
-                    {
-                        $fullTrace[$id]['timeAlert'] = $time - $lastTime;
-                    }
-                    else
-                    {
-                        $fullTrace[$id]['timeAlert'] = false;
-                    }
-
-                    $lastMemory = $memory;
-                    $lastTime = $time;
-                }
-                else
-                {
-                    $fullTrace[$id]['timeOnExit'] = $time;
-                    $fullTrace[$id]['memoryOnExit'] = $memory;
-                    array_pop($idCallStack);
-                }
             }
+        }
             ?>
     </div>
     <script type="text/javascript">
-            $(document).ready(function() {
-                //alert($('#trace>ul').length);
-                $('#trace>ul').click(function(event) {
-                    //alert(event.target);
-                    $(event.target).children("ul").toggle();
-                })
+        $(document).ready(function() {
+            //alert($('#trace>ul').length);
+            $('#trace>ul').click(function(event) {
+                //alert(event.target);
+                $(event.target).children("ul").toggle();
             })
-
-            function showCode(where) {
-                var file = $(where).parent().parent().find('small').text();
-                window.open('trace-code.php?line=' + $(where).text() + '&file=' + file + '#l' + $(where).text(), 'code', 'width=500,height=400,toolbar=no,status=no,menubar=no,scrollbars=yes');
-            }
-            
-            function toggleSubcalls(el) {
-                id = $(el).parents("tr")[0].id;
-                $($(el).parents("tr")[0]).siblings("[rel=" + id + "]").each(function() {
-                    $(this).toggle();
-                });
-            }
-
-        </script>
-        <?php return; ?>
-            <table>
-                <tr>
-                    
-                    <td colspan="2">
-                        <?= $traceFile; ?><br />
-                        <strong><?= count($fullTrace); ?></strong> function calls in <strong><?php $l = end($fullTrace);
-                    echo $l['timeOnEntry']; ?> seconds</strong>, using <strong><?= $l['memoryOnEntry'] ?> MB</strong> of memory.
-                    </td>
-                    <td></td>
-                    <td style="vertical-align:bottom"><small>in = start func.<br />out = end func.</small></td>
-                    <td style="vertical-align:bottom"><small>in = start func.<br />out = end func.</small></td>
-                </tr>
-                <tr>
-                    <th>ID</th>
-                    <th>Parent</th>
-                    <th style="max-width: 70%">Function / File</th>
-                    <th style="min-width: 8em;">Line</th>
-                    <th style="min-width: 8em;">Time</th>
-                    <th style="min-width: 8em;">Memory</th>
-                </tr>
-                <?php
-                foreach ($fullTrace as $trace)
-                {
-                    /**
-                     * 
-                     * 
-                      echo "<pre>";
-                      var_dump($trace);
-                      echo "</pre><hr>";
-                      /**
-                     */
-                    ?>
-                    <tr id="call<?php echo $trace['id'];?>" rel="call<?php echo $trace['parentId'];?>"
-                        <?php if ($trace['level'] > 2) { echo 'style="display:none"'; } ?>>
-                        <td><?php echo $trace['id'];?></td>
-                        <td><?php echo $trace['parentId'];?></td>
-                        <td style="padding-left:<?php
-            if (isset($trace['level']))
-            {
-                echo $trace['level'] * 10;
-            }
-            else
-            {
-                echo '0';
-            }
-                    ?>px">
-                            <?php if (isset($trace['type']) and $trace['type'] == 0)
-                            { ?><a target="_blank" href="http://php.net/<?= $trace['function'] ?>"><span class="native" title="PHP doc <?= $trace['function'] ?>">&#x261b; </span></a><?php
-                }
-                else
-                {
-                    /**
-                     * custom color identifier for ZendFramework methods
-                     */
-                    if (isset($trace['function']) and substr($trace['function'],
-                                                             0, 5) == 'Zend_')
-                    {
-                        $userFunction = 'Zend';
-                    }
-                    /**
-                     * And all Corretge namespace classes and methods
-                     */
-                    elseif (isset($trace['function']) and substr($trace['function'],
-                                                                 0,
-                                                                 $XDEBUG_TRACE_GUI_CUSTOM_NAMESPACE_LEN) == XDEBUG_TRACE_GUI_CUSTOM_NAMESPACE)
-                    {
-                        $userFunction = 'Corretge';
-                    }
-                    else
-                    {
-                        $userFunction = 'user';
-                    }
-                                ?><span class="<?= $userFunction ?>" title="UDF ">&#x261b; </span><?php } ?><strong><?php if (isset($trace['type']) and $trace['type'] == 0)
-                    { ?>\<?php } ?><a href="#" onclick="toggleSubcalls(this); return false;"><?= @$trace['function'] ?></a></strong><ul><?= @$trace['valParms'] ?></ul><br />
-                            <small><?= @$trace['filename'] ?></small>
-                            <span class="warning">
-                                <?php
-                                if (isset($trace['timeAlert']) and $trace['timeAlert'])
-                                {
-                                    echo "<br />Warning, time jump exceeds trigger! {$trace['timeAlert']}";
-                                }
-                                if (isset($trace['memoryAlert']) and $trace['memoryAlert'])
-                                {
-                                    echo "<br />Warning, memory jump exceeds trigger! {$trace['memoryAlert']}";
-                                }
-                                ?>
-                            </span>
-
-                        </td>
-                        <td class="digit line">
-                            <?php
-                            if (isset($trace['line']))
-                            {
-                                echo "<a href=\"#{$trace['line']}\">{$trace['line']}</a>";
-                            }
-                            ?>
-                        </td>
-                        <td class="digit" style="<?php if (isset($trace['timeAlert']) and $trace['timeAlert'])
-                    { ?>background:maroon;color:white<?php } ?>">in: <?= @$trace['timeOnEntry'] ?> s<br />out: <?= @$trace['timeOnExit'] ?> <br />
-                            <?php
-                            if (isset($trace['timeOnEntry']) and isset($trace['timeOnExit']))
-                            {
-                                $jTimeConsumit = ($trace['timeOnExit'] - $trace['timeOnEntry']) * 1000000;
-                                echo number_format($jTimeConsumit, 0) . ' µs';
-                            }
-                            else
-                            {
-                                $jTimeConsumit = 0;
-                            }
-                            ?></td>
-                        <td class="digit" style="<?php if (isset($trace['memoryAlert']) and $trace['memoryAlert'])
-                    { ?>background:maroon;color:white<?php } ?>">in: <?= @$trace['memoryOnEntry'] ?> MB<br />out: <?= @$trace['memoryOnExit'] ?> MB<br />
-
-
-                            <?php
-                            if (isset($trace['memoryOnEntry']) and isset($trace['memoryOnExit']))
-                            {
-                                $jMemoryConsumit = ($trace['memoryOnExit'] - $trace['memoryOnEntry']) * 1000000;
-                                echo number_format($jMemoryConsumit, 0) . ' B';
-                            }
-                            else
-                            {
-                                $jMemoryConsumit = 0;
-                            }
-                            ?>
-                        </td>
-                    </tr>
-                    <?php
-                    if (isset($trace) and isset($trace['function']))
-                    {
-                        if (isset($aSumary[$trace['function']]))
-                        {
-                            $aSumary[$trace['function']]['mem'] += $jMemoryConsumit;
-                            $aSumary[$trace['function']]['tim'] += $jTimeConsumit;
-                            $aSumary[$trace['function']]['cnt']++;
-                        }
-                        else
-                        {
-                            $aSumary[$trace['function']]['func'] = $trace['function'];
-                            $aSumary[$trace['function']]['mem'] = $jMemoryConsumit;
-                            $aSumary[$trace['function']]['tim'] = $jTimeConsumit;
-                            $aSumary[$trace['function']]['cnt'] = 1;
-                        }
-                    }
-
-                    /**
-                     * fem el sumari per files
-                     */
-                    if (isset($trace) and isset($trace['filename']))
-                    {
-                        if (isset($aSumaryS[$trace['filename']]))
-                        {
-                            $aSumaryS[$trace['filename']]['mem'] += $jMemoryConsumit;
-                            $aSumaryS[$trace['filename']]['tim'] += $jTimeConsumit;
-                            $aSumaryS[$trace['filename']]['cnt']++;
-                        }
-                        else
-                        {
-                            $aSumaryS[$trace['filename']]['filename'] = $trace['filename'];
-                            $aSumaryS[$trace['filename']]['mem'] = $jMemoryConsumit;
-                            $aSumaryS[$trace['filename']]['tim'] = $jTimeConsumit;
-                            $aSumaryS[$trace['filename']]['cnt'] = 1;
-                        }
-                    }
-                }
-                ?>
-            </table>
-            <?php
-        }
-
-//        usort($aSumary, 'aryComp');
-        unset($fullTrace);
-        usortByArrayKey($aSumary, 'tim', SORT_DESC);
-        usortByArrayKey($aSumaryS, 'tim', SORT_DESC);
-
-        echo "<a name=\"sumary\"></a><h2>Sumari de funcions per temps emprat</h2>
-             <table>
-                <tr>
-                    <th>Function</th>
-                    <th>times</th>
-                    <th>sum Time</th>
-                    <th>sum Memory</th>
-                    <th>avg Time</th>
-                    <th>avg Memory</th>
-</tr>
-             ";
-
-        foreach ($aSumary as $row)
-        {
-            if ($row['cnt'] != 0)
-            {
-
-                $jAvgTim = $row['tim'] / $row['cnt'];
-                $jAvgMem = $row['mem'] / $row['cnt'];
-            }
-            else
-            {
-                $jAvgTim = 0;
-                $jAvgMem = 0;
-            }
-
-            $row['cnt'] = number_format($row['cnt'], 0);
-            $row['tim'] = number_format($row['tim'], 0);
-            $row['mem'] = number_format($row['mem'], 0);
-            
-            $jAvgMem = number_format($jAvgMem, 0);
-            $jAvgTim = number_format($jAvgTim, 0);
-
-            echo "<tr>
-                 <td>{$row['func']}</td>
-                 <td class='digit'>{$row['cnt']}</td>
-                 <td class='digit'>{$row['tim']}</td>
-                 <td class='digit'>{$row['mem']}</td>
-                 <td class='digit'>{$jAvgTim}</td>
-                 <td class='digit'>{$jAvgMem}</td>
-                 
-                 </tr>";
-        }
-
-
-        echo "</table>";
-
-
-
-
-        echo "<a name=\"sumary\"></a><h2>Sumari d'scripts per temps emprat</h2>
-             <table>
-                <tr>
-                    <th>Script</th>
-                    <th>instructions</th>
-                    <th>sum Time</th>
-                    <th>sum Memory</th>
-                    <th>avg Time per inst</th>
-                    <th>avg Memory per inst</th>
-               </tr>
-             ";
-
-        foreach ($aSumaryS as $row)
-        {
-            if ($row['cnt'] != 0)
-            {
-
-                $jAvgTim = $row['tim'] / $row['cnt'];
-                $jAvgMem = $row['mem'] / $row['cnt'];
-            }
-            else
-            {
-                $jAvgTim = 0;
-                $jAvgMem = 0;
-            }
-
-            $row['cnt'] = number_format($row['cnt'], 0);
-            $row['mem'] = number_format($row['mem'], 0);
-            $row['tim'] = number_format($row['tim'], 0);
-            $jAvgMem = number_format($jAvgMem, 0);
-            $jAvgTim = number_format($jAvgTim, 0);
-
-            echo "<tr>
-                 <td>{$row['filename']}</td>
-                 <td class='digit'>{$row['cnt']}</td>
-                 <td class='digit'>{$row['tim']}</td>
-                 <td class='digit'>{$row['mem']}</td>
-                 <td class='digit'>{$jAvgTim}</td>
-                 <td class='digit'>{$jAvgMem}</td>
-                 </tr>";
-        }
-
-
-        echo "</table>";
-        ?>
-
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('td.line a').each(function() {
-
-                    $(this).click(function() {
-                        showCode(this);
-                    })
-
-                })
-            })
-
-            function showCode(where) {
-                var file = $(where).parent().parent().find('small').text();
-                window.open('trace-code.php?line=' + $(where).text() + '&file=' + file + '#l' + $(where).text(), 'code', 'width=500,height=400,toolbar=no,status=no,menubar=no,scrollbars=yes');
-            }
-            
-            function toggleSubcalls(el) {
-                id = $(el).parents("tr")[0].id;
-                $($(el).parents("tr")[0]).siblings("[rel=" + id + "]").each(function() {
-                    $(this).toggle();
-                });
-            }
-
-        </script>
+        })
+    </script>
     </body>
 </html>

@@ -3,6 +3,7 @@
 $config['directory'] = ini_get('xdebug.trace_output_dir');
 
 ini_set('xdebug.auto_trace', 'Off');
+set_time_limit(600);
 
 /**
  * Do not modify below this line :) 
