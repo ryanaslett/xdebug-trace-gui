@@ -44,6 +44,10 @@ require_once "src/XdebugTraceReader.php";
 
             <label>If the memory jumps <input type="text" name="memory" value="<?= XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert</label>
             <label>If the execution time jumps <input type="text" name="time" value="<?= XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert</label>
+            <label>Sort calls by 
+                <select name="sort_by" id="sort_by"><option value="0">Call order</option>
+                    <option value="sortByStats">Stats</option>
+                </select> (takes effect on expand)</label>
 
             <input type="submit" value="parse" />
 
@@ -134,9 +138,16 @@ require_once "src/XdebugTraceReader.php";
             //alert($('#trace>ul').length);
             $('#trace>ul').click(function(event) {
                 //alert(event.target);
-                $(event.target).children("ul").toggle();
+                var sortBy = $('#sort_by').val();
+                list = $(event.target).children("ul");
+                list.children("li").sort(window[sortBy]).appendTo(list);
+                list.toggle();
             })
         })
+        function sortByStats(a, b) {
+            return parseFloat($(b).children(".stat").text())
+                - parseFloat($(a).children(".stat").text());
+        }
     </script>
     </body>
 </html>

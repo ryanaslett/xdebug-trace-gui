@@ -107,7 +107,13 @@ tr:nth-child(odd) {background: aliceblue;}
 }
 
 #trace span.stat {
+    color: green;
 /*    position: absolute;
     top: 0;
     right: 0;*/
+}
+
+#trace span.warning {
+  font-weight: bold;
+  color: maroon;
 }
