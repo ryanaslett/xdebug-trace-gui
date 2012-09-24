@@ -6,10 +6,13 @@ class XdebugTraceReader {
     const POINT = 2;
     const TIME = 3;
     const MEMORY = 4;
+    const NAME = 5;
+    const EXIT_TIME = 11;
+    const EXIT_MEMORY = 12;
+    
     
     private $stack = array();
     private $fh;
-    private $lastCall = array();
 
     public function __construct($file) {
         $this->fh = fopen($file, 'r');
@@ -20,41 +23,32 @@ class XdebugTraceReader {
     }
     
     public function getMemoryUsage($out) {
-        $id = $out[self::ID];
-        if (!isset($this->stack[$id])) {
-            return null;
-        }
-        $in = $this->stack[$id];
-        return $out[self::MEMORY] - $in[self::MEMORY];
+        return $out[self::EXIT_MEMORY] - $out[self::MEMORY];
     }
     
     public function getExecutionTime($out) {
-        $id = $out[self::ID];
-        if (!isset($this->stack[$id])) {
-            return null;
-        }
-        $in = $this->stack[$id];
-        return $out[self::TIME] - $in[self::TIME];
+        return $out[self::EXIT_TIME] - $out[self::TIME];
     }
 
     /**
      * @return XdebugTraceCall
      */
     public function next() {
-        if (isset($this->lastCall[self::POINT]) && $this->lastCall[self::POINT]) {
-            unset($this->stack[$this->lastCall[self::ID]]);
-        }
-        while ($this->lastCall = $data = fgetcsv($this->fh, 0, "\t")) {
+        while ($data = fgetcsv($this->fh, 0, "\t")) {
             if (count($data) >= 3) {
                 break;
             }
         }
         if (!$data[self::POINT]) {
-            $this->stack[$data[self::ID]] = $data;
+            $result = $this->stack[$data[self::ID]] = $data;
+        } else {
+            $result = $this->stack[$data[self::ID]];
+            $result[self::POINT] = 1;
+            $result[self::EXIT_TIME] = $data[self::TIME];
+            $result[self::EXIT_MEMORY] = $data[self::MEMORY];
+            unset($this->stack[$data[self::ID]]);
         }
-//        $this->test = array($data[1], $data[5]);
-        return $data;
-//        return XdebugTraceCall::newFromArray($data);
+        return $result;
     }
 
 }
