@@ -17,7 +17,7 @@ require_once "src/XdebugTraceReader.php";
         <form method="get">
             <label>File
                 <select name="file">
-                    <option value="" selected="selected"> -- Select -- </option>
+                    <option value=""> -- Select -- </option>
                     <?php
                     $files = new DirectoryIterator($config['directory']);
                     foreach ($files as $file)
@@ -33,17 +33,18 @@ require_once "src/XdebugTraceReader.php";
                         $date = date('Y-m-d H:i:s', $file->getCTime());
 
 
-                        echo '<option value="' . $file->getFilename() . '"> ' . $date . ' - ' . $file->getFilename() . '- ' . number_format($file->getSize() / 1024,
-                                                                                                                                            0,
-                                                                                                                                            ',',
-                                                                                                                                            '.') . ' KB</option>';
+                        echo '<option value="' . $file->getFilename() . '"'
+                            . (isset($_GET['file']) && $file->getFileName() == $_GET['file'] ? ' selected="selected"' : '')
+                            . '> ' . $date . ' - ' . $file->getFilename() . '- ' 
+                            . number_format($file->getSize() / 1024, 0, ',', '.') 
+                            . ' KB</option>' . PHP_EOL;
                     }
                     ?>
                 </select>
             </label>
 
-            <label>If the memory jumps <input type="text" name="memory" value="<?= XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert and show nested calls</label>
-            <label>If the execution time jumps <input type="text" name="time" value="<?= XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert and show nested calls</label>
+            <label>If the memory jumps <input type="text" name="memory" value="<?= @$_GET['memory'] ?: XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert and show nested calls</label>
+            <label>If the execution time jumps <input type="text" name="time" value="<?= @$_GET['time'] ?: XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert and show nested calls</label>
             <label>Sort calls by 
                 <select name="sort_by" id="sort_by"><option value="sortByCall">naturally</option>
                     <option value="sortByStats">time</option>
