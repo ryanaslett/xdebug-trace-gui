@@ -1,5 +1,6 @@
 <?php
 require 'trace.config.php';
+require_once "src/XdebugTraceReader.php";
 
 ?>
 <html>
@@ -88,16 +89,15 @@ require 'trace.config.php';
         else
         {
 
-
-            $previousLevel = 0;
-
             echo '<div id="trace">';
-            $fh = fopen($traceFile, 'r');
-            while ($data = fgetcsv($fh, 0, "\t"))
+            $reader = new XdebugTraceReader($traceFile);
+            
+            $previousLevel = 0;
+            while ($data = $reader->next())
             {
-                if (count($data) < 3 ) { continue; }
-                @list($level, $id, $point, $time, $memory, $function, $type, $file, $filename, $line, $numParms) = $data;
-
+                @list($level, $id, $point, $time, 
+                    $memory, $function, $type, $file, 
+                    $filename, $line, $numParms) = $data;
                 if ($level > $previousLevel) {
                     if ($level >= 3) { ob_start(); }
                     echo "<ul>\n"; 
@@ -105,25 +105,17 @@ require 'trace.config.php';
                 elseif ($level < $previousLevel) {
                     echo "</ul>\n";
                     if ($level >=3 
-                        && $memory - $fullTrace[$id]['memoryOnEntry'] > 100000) {
+                        && $reader->getMemoryUsage($data) > 100000) {
                         ob_end_flush();
                     } elseif ($level >= 3) {
                         ob_end_clean();
                     }
                 }
-                if (!$point)
-                {
-                    $fullTrace[$id]['memoryOnEntry'] = $memory;
+                if (!$point) {
                     printf("<li>%s() %s:%d", $function, $filename, $line);
-                }
-                else
-                {
-                    $fullTrace[$id]['timeOnExit'] = $time;
-                    $fullTrace[$id]['memoryOnExit'] = $memory;
-                    $memoryUsage = $fullTrace[$id]['memoryOnExit'] - $fullTrace[$id]['memoryOnEntry'];
-                    printf(" %+.4f Mb</li>\n", round($memoryUsage/(1024*1024), 4));
-                    $fullTrace[$id] = null;
-                    unset($fullTrace[$id]);
+                } else {
+                    printf(" %+.4f Mb</li>\n", 
+                        $reader->getMemoryUsage($data) / (1024 * 1024));
                 }
                 $previousLevel = $level;
                 
