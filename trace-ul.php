@@ -42,8 +42,8 @@ require_once "src/XdebugTraceReader.php";
                 </select>
             </label>
 
-            <label>If the memory jumps <input type="text" name="memory" value="<?= XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert</label>
-            <label>If the execution time jumps <input type="text" name="time" value="<?= XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert</label>
+            <label>If the memory jumps <input type="text" name="memory" value="<?= XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert and show nested calls</label>
+            <label>If the execution time jumps <input type="text" name="time" value="<?= XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert and show nested calls</label>
             <label>Sort calls by 
                 <select name="sort_by" id="sort_by"><option value="sortByCall">naturally</option>
                     <option value="sortByStats">time</option>
@@ -70,10 +70,10 @@ require_once "src/XdebugTraceReader.php";
         $traceFile = $config['directory'] . '/' . $_GET ['file'];
 
 
-        $memJump = 1;
+        $memJump = 1000000;
         if (isset($_GET['memory']))
         {
-            $memJump = (float) $_GET['memory'];
+            $memJump = (float) $_GET['memory'] * 1000000;
         }
 
         $timeJump = 1;
@@ -108,10 +108,13 @@ require_once "src/XdebugTraceReader.php";
                 }
                 elseif ($level < $previousLevel) {
                     echo "</ul>\n";
-                    if ($level >=3 
-                        && $reader->getMemoryUsage($data) > 100000) {
+                    $dropNestedCalls = $level >= 3;
+                    $flushNestedCalls = $level >= 3 
+                        && ($reader->getMemoryUsage($data) > $memJump 
+                            || $reader->getExecutionTime($data) > $timeJump);
+                    if ($flushNestedCalls) {
                         ob_end_flush();
-                    } elseif ($level >= 3) {
+                    } elseif ($dropNestedCalls) {
                         ob_end_clean();
                     }
                 }
@@ -122,7 +125,7 @@ require_once "src/XdebugTraceReader.php";
                     $executionTime = $reader->getExecutionTime($data);
                     $memoryUsage = $reader->getMemoryUsage($data);
                     $warning = $executionTime > $timeJump
-                        || $memoryUsage > $memJump * 1000000;
+                        || $memoryUsage > $memJump;
                     printf(' <span class="stat%s">%.3fms / %+.4f Mb</span></li>%s',
                         $warning ? " warning" : "",
                         $executionTime * 1000,
