@@ -45,8 +45,8 @@ require_once "src/XdebugTraceReader.php";
             <label>If the memory jumps <input type="text" name="memory" value="<?= XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert</label>
             <label>If the execution time jumps <input type="text" name="time" value="<?= XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert</label>
             <label>Sort calls by 
-                <select name="sort_by" id="sort_by"><option value="0">Call order</option>
-                    <option value="sortByStats">Stats</option>
+                <select name="sort_by" id="sort_by"><option value="sortByCall">naturally</option>
+                    <option value="sortByStats">time</option>
                 </select> (takes effect on expand)</label>
 
             <input type="submit" value="parse" />
@@ -116,16 +116,18 @@ require_once "src/XdebugTraceReader.php";
                     }
                 }
                 if (!$point) {
-                    printf("<li>%s() %s:%d", $function, $filename, $line);
+                    printf('<li id="call%d">%s() %s:%d', 
+                        $id, $function, $filename, $line);
                 } else {
                     $executionTime = $reader->getExecutionTime($data);
                     $memoryUsage = $reader->getMemoryUsage($data);
                     $warning = $executionTime > $timeJump
                         || $memoryUsage > $memJump * 1000000;
-                    printf(' <span class="stat%s">%.3fms / %+.4f Mb</span></li>',
+                    printf(' <span class="stat%s">%.3fms / %+.4f Mb</span></li>%s',
                         $warning ? " warning" : "",
                         $executionTime * 1000,
-                        $memoryUsage / (1024 * 1024));
+                        $memoryUsage / (1024 * 1024),
+                        PHP_EOL);
                 }
                 $previousLevel = $level;
                 
@@ -135,18 +137,23 @@ require_once "src/XdebugTraceReader.php";
     </div>
     <script type="text/javascript">
         $(document).ready(function() {
-            //alert($('#trace>ul').length);
             $('#trace>ul').click(function(event) {
-                //alert(event.target);
-                var sortBy = $('#sort_by').val();
                 list = $(event.target).children("ul");
-                list.children("li").sort(window[sortBy]).appendTo(list);
+                var sortBy = $('#sort_by').val();
+                if (list.is(":hidden") && list.sortedBy != sortBy) {
+                    list.children("li").sort(window[sortBy]).appendTo(list);
+                    list.sortedBy = sortBy;
+                }
                 list.toggle();
             })
         })
         function sortByStats(a, b) {
             return parseFloat($(b).children(".stat").text())
                 - parseFloat($(a).children(".stat").text());
+        }
+        function sortByCall(a, b) {
+            return parseInt(a.id.substr(4))
+                - parseInt(b.id.substr(4));
         }
     </script>
     </body>
