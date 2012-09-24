@@ -100,3 +100,14 @@ tr:nth-child(odd) {background: aliceblue;}
 #trace li ul {
     display: none;
 }
+
+#trace li {
+    position: relative;
+    /*border: 1px solid black;*/
+}
+
+#trace span.stat {
+/*    position: absolute;
+    top: 0;
+    right: 0;*/
+}

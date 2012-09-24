@@ -1,8 +1,10 @@
 <?php
 
 class XdebugTraceReader {
+    const LEVEL = 0;
     const ID = 1;
     const POINT = 2;
+    const TIME = 3;
     const MEMORY = 4;
     
     private $stack = array();
@@ -20,10 +22,19 @@ class XdebugTraceReader {
     public function getMemoryUsage($out) {
         $id = $out[self::ID];
         if (!isset($this->stack[$id])) {
-            return 0;
+            return null;
         }
         $in = $this->stack[$id];
         return $out[self::MEMORY] - $in[self::MEMORY];
+    }
+    
+    public function getExecutionTime($out) {
+        $id = $out[self::ID];
+        if (!isset($this->stack[$id])) {
+            return null;
+        }
+        $in = $this->stack[$id];
+        return $out[self::TIME] - $in[self::TIME];
     }
 
     /**

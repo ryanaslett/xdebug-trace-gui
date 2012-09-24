@@ -114,8 +114,14 @@ require_once "src/XdebugTraceReader.php";
                 if (!$point) {
                     printf("<li>%s() %s:%d", $function, $filename, $line);
                 } else {
-                    printf(" %+.4f Mb</li>\n", 
-                        $reader->getMemoryUsage($data) / (1024 * 1024));
+                    $executionTime = $reader->getExecutionTime($data);
+                    $memoryUsage = $reader->getMemoryUsage($data);
+                    $warning = $executionTime > $timeJump
+                        || $memoryUsage > $memJump * 1000000;
+                    printf(' <span class="stat%s">%.3fms / %+.4f Mb</span></li>',
+                        $warning ? " warning" : "",
+                        $executionTime * 1000,
+                        $memoryUsage / (1024 * 1024));
                 }
                 $previousLevel = $level;
                 
