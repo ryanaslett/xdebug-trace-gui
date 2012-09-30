@@ -7,6 +7,8 @@ class XdebugTraceReader {
     const TIME = 3;
     const MEMORY = 4;
     const NAME = 5;
+    const FILENAME = 8;
+    const LINE = 9;
     const EXIT_TIME = 11;
     const EXIT_MEMORY = 12;
     

@@ -4,6 +4,7 @@ require_once "src/XdebugTraceReader.php";
 require_once "src/XdebugTraceSummary.php";
 
 use \XdebugTraceSummary as Summary;
+use \XdebugTraceReader as Reader;
 
 ?>
 <html>
@@ -98,23 +99,20 @@ use \XdebugTraceSummary as Summary;
         {
 
             echo '<div id="trace">';
-            $reader = new XdebugTraceReader($traceFile);
-            $summary = new XdebugTraceSummary();
+            $reader = new Reader($traceFile);
+            $summary = new Summary();
             
             $previousLevel = 0;
             while ($data = $reader->next())
             {
-                @list($level, $id, $point, $time, 
-                    $memory, $function, $type, $file, 
-                    $filename, $line, $numParms) = $data;
-                if ($level > $previousLevel) {
-                    if ($level >= 3) { ob_start(); }
+                if ($data[Reader::LEVEL] > $previousLevel) {
+                    if ($data[Reader::LEVEL] >= 3) { ob_start(); }
                     echo "<ul>\n"; 
                 }
-                elseif ($level < $previousLevel) {
+                elseif ($data[Reader::LEVEL] < $previousLevel) {
                     echo "</ul>\n";
-                    $dropNestedCalls = $level >= 3;
-                    $flushNestedCalls = $level >= 3 
+                    $dropNestedCalls = $data[Reader::LEVEL] >= 3;
+                    $flushNestedCalls = $data[Reader::LEVEL] >= 3 
                         && ($reader->getMemoryUsage($data) > $memJump 
                             || $reader->getExecutionTime($data) > $timeJump);
                     if ($flushNestedCalls) {
@@ -123,9 +121,10 @@ use \XdebugTraceSummary as Summary;
                         ob_end_clean();
                     }
                 }
-                if (!$point) {
-                    printf('<li id="call%d">%s() %s:%d', 
-                        $id, $function, $filename, $line);
+                if (!$data[Reader::POINT]) {
+                    printf('<li id="call%d">%s() %s:%d',
+                        $data[Reader::ID], $data[Reader::NAME], 
+                        $data[Reader::FILENAME], $data[Reader::LINE]);
                 } else {
                     $executionTime = $reader->getExecutionTime($data);
                     $memoryUsage = $reader->getMemoryUsage($data);
@@ -138,7 +137,7 @@ use \XdebugTraceSummary as Summary;
                         PHP_EOL);
                     $summary->add($data);
                 }
-                $previousLevel = $level;
+                $previousLevel = $data[Reader::LEVEL];
                 
             }
         }
