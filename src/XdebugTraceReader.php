@@ -31,11 +31,15 @@ class XdebugTraceReader {
     }
 
     /**
-     * @return XdebugTraceCall
+     * @return array
      */
     public function next() {
         while ($data = fgetcsv($this->fh, 0, "\t")) {
-            if (count($data) >= 3) {
+            $isTraceRecord = count($data) >= 3;
+            $isEntryPoint = $isTraceRecord && !$data[self::POINT];
+            $entryPointExists = $isTraceRecord && $data[self::POINT]
+                && isset($this->stack[$data[self::ID]]);
+            if ($isTraceRecord && ($isEntryPoint || $entryPointExists)) {
                 break;
             }
         }
