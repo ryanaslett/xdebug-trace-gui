@@ -12,6 +12,7 @@ class XdebugTraceSummary {
     private $summary = array();
     
     public function add($data) {
+        if (!isset($data[Reader::NAME])) { return; }
         $index = $data[Reader::NAME];
         if (!isset($this->summary[$index])) {
             $this->summary[$index] = array(
@@ -23,13 +24,13 @@ class XdebugTraceSummary {
                 self::AVG_MEMORY => 0);
         }
         $s =& $this->summary[$index];
-        $executionTime = $data[Reader::EXIT_TIME] - $data[Reader::TIME];
         /**see Incremental Average Algorithm http://jvminside.blogspot.com/2010/01/incremental-average-calculation.html */
-        $s[self::AVG_TIME] = (($executionTime - $s[self::AVG_TIME]) / $s[self::TIMES] + 1) 
+        $executionTime = $data[Reader::EXIT_TIME] - $data[Reader::TIME];
+        $s[self::AVG_TIME] = (($executionTime - $s[self::AVG_TIME]) / ($s[self::TIMES] + 1)) 
             + $s[self::AVG_TIME];
         $s[self::TOTAL_TIME] += $executionTime;
         $memoryUsage = $data[Reader::EXIT_MEMORY] - $data[Reader::MEMORY];
-        $s[self::AVG_MEMORY] = (($memoryUsage - $s[self::AVG_MEMORY]) / $s[self::TIMES] + 1 )
+        $s[self::AVG_MEMORY] = (($memoryUsage - $s[self::AVG_MEMORY]) / ($s[self::TIMES] + 1))
             + $s[self::AVG_MEMORY];
         $s[self::TOTAL_MEMORY] += $memoryUsage;
         $s[self::TIMES]++;
