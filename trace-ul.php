@@ -1,6 +1,9 @@
 <?php
 require 'trace.config.php';
 require_once "src/XdebugTraceReader.php";
+require_once "src/XdebugTraceSummary.php";
+
+use \XdebugTraceSummary as Summary;
 
 ?>
 <html>
@@ -96,6 +99,7 @@ require_once "src/XdebugTraceReader.php";
 
             echo '<div id="trace">';
             $reader = new XdebugTraceReader($traceFile);
+            $summary = new XdebugTraceSummary();
             
             $previousLevel = 0;
             while ($data = $reader->next())
@@ -132,12 +136,31 @@ require_once "src/XdebugTraceReader.php";
                         $executionTime * 1000,
                         $memoryUsage / (1024 * 1024),
                         PHP_EOL);
+                    $summary->add($data);
                 }
                 $previousLevel = $level;
                 
             }
         }
             ?>
+        <h2>Summary of function calls</h2>
+        <table>
+            <tr>
+               <th>Function</th>
+               <th>times</th>
+               <th>sum Time</th>
+               <th>sum Memory</th>
+               <th>avg Time</th>
+               <th>avg Memory</th>
+            </tr>
+            <?php while ($data = $summary->next()) {
+                printf("<tr><td>%s</td><td>%d</td><td>%f</td><td>%f</td><td>%f</td><td>%f</td></tr>",
+                    $data[Summary::NAME], $data[Summary::TIMES], 
+                    $data[Summary::TOTAL_TIME], $data[Summary::TOTAL_MEMORY], 
+                    $data[Summary::AVG_TIME], $data[Summary::AVG_MEMORY]);
+            } ?>
+        </table>
+             
     </div>
     <script type="text/javascript">
         $(document).ready(function() {
