@@ -36,25 +36,21 @@ class XdebugTraceReader {
      * @return array
      */
     public function next() {
-        while ($data = fgetcsv($this->fh, 0, "\t")) {
-            $isTraceRecord = count($data) >= 3;
-            $isEntryPoint = $isTraceRecord && !$data[self::POINT];
-            $entryPointExists = $isTraceRecord && $data[self::POINT]
-                && isset($this->stack[$data[self::ID]]);
-            if ($isTraceRecord && ($isEntryPoint || $entryPointExists)) {
-                break;
-            }
-        }
+        $data = fgetcsv($this->fh, 0, "\t");
+        if (!isset($data[self::ID])) { return null; }
         if (!$data[self::POINT]) {
-            $result = $this->stack[$data[self::ID]] = $data;
+            $result = $this->stack[] = $data;
         } else {
-            $result = $this->stack[$data[self::ID]];
+            $result = array_pop($this->stack);
             $result[self::POINT] = 1;
             $result[self::EXIT_TIME] = $data[self::TIME];
             $result[self::EXIT_MEMORY] = $data[self::MEMORY];
-            unset($this->stack[$data[self::ID]]);
         }
         return $result;
+    }
+    
+    public function init() {
+        while ((strpos(fgets($this->fh), "TRACE START")) === FALSE) {};
     }
 
 }

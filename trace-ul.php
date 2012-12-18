@@ -100,6 +100,7 @@ use \XdebugTraceReader as Reader;
 
             echo '<div id="trace">';
             $reader = new Reader($traceFile);
+            $reader->init();
             $summary = new Summary();
             
             $previousLevel = 0;
