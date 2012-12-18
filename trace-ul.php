@@ -2,6 +2,7 @@
 require 'trace.config.php';
 require_once "src/XdebugTraceReader.php";
 require_once "src/XdebugTraceSummary.php";
+require_once "src/XdebugTraceOutputList.php";
 
 use \XdebugTraceSummary as Summary;
 use \XdebugTraceReader as Reader;
@@ -97,48 +98,15 @@ use \XdebugTraceReader as Reader;
         }
         else
         {
-
             echo '<div id="trace">';
             $reader = new Reader($traceFile);
-            $reader->init();
             $summary = new Summary();
+            $output = new XdebugTraceOutputList($timeJump, $memJump);
             
-            $previousLevel = 0;
+            $reader->init();
             while ($data = $reader->next())
             {
-                if ($data[Reader::LEVEL] > $previousLevel) {
-                    if ($data[Reader::LEVEL] >= 3) { ob_start(); }
-                    echo "<ul>\n"; 
-                }
-                elseif ($data[Reader::LEVEL] < $previousLevel) {
-                    echo "</ul>\n";
-                    $dropNestedCalls = $data[Reader::LEVEL] >= 3;
-                    $flushNestedCalls = $data[Reader::LEVEL] >= 3 
-                        && ($reader->getMemoryUsage($data) > $memJump 
-                            || $reader->getExecutionTime($data) > $timeJump);
-                    if ($flushNestedCalls) {
-                        ob_end_flush();
-                    } elseif ($dropNestedCalls) {
-                        ob_end_clean();
-                    }
-                }
-                if (!$data[Reader::POINT]) {
-                    printf('<li id="call%d">%s() %s:%d',
-                        $data[Reader::ID], $data[Reader::NAME], 
-                        $data[Reader::FILENAME], $data[Reader::LINE]);
-                } else {
-                    $executionTime = $reader->getExecutionTime($data);
-                    $memoryUsage = $reader->getMemoryUsage($data);
-                    $warning = $executionTime > $timeJump
-                        || $memoryUsage > $memJump;
-                    printf(' <span class="stat%s">%.3fms / %+.4f Mb</span></li>%s',
-                        $warning ? " warning" : "",
-                        $executionTime * 1000,
-                        $memoryUsage / (1024 * 1024),
-                        PHP_EOL);
-                    $summary->add($data);
-                }
-                $previousLevel = $data[Reader::LEVEL];
+                $output->printLine($data);
                 
             }
         }
