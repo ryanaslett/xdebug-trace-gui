@@ -1,0 +1,9 @@
+Version: 2.1.0
+File format: 2
+TRACE START [2012-12-18 00:37:42]
+1	0	0	0.000210	321320	{main}	1		/var/www/equest2_git_2/ui/bin/run_tests.sh	0
+2	1	0	0.000315	321784	dirname	0		/var/www/equest2_git_2/ui/bin/run_tests.sh	15
+2	1	1	0.000365	321852
+			4.013765	11712
+TRACE END   [2012-12-18 00:37:46]
+

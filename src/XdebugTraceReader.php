@@ -1,6 +1,7 @@
 <?php
 
 class XdebugTraceReader {
+
     const LEVEL = 0;
     const ID = 1;
     const POINT = 2;
@@ -11,8 +12,7 @@ class XdebugTraceReader {
     const LINE = 9;
     const EXIT_TIME = 11;
     const EXIT_MEMORY = 12;
-    
-    
+
     private $stack = array();
     private $fh;
 
@@ -36,9 +36,9 @@ class XdebugTraceReader {
      * @return array
      */
     public function next() {
-        $data = explode("\t", fgets($this->fh));
-        if (!isset($data[self::ID])) { return null; }
-        if (!$data[self::POINT]) {
+        $data = explode("\t", rtrim(fgets($this->fh)));
+        if (count($data) < 4) { return null; }
+        if (isset($data[self::POINT]) && $data[self::POINT] == "0") {
             $result = $this->stack[] = $data;
         } else {
             $result = array_pop($this->stack);
