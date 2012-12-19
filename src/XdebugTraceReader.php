@@ -36,7 +36,7 @@ class XdebugTraceReader {
      * @return array
      */
     public function next() {
-        $data = fgetcsv($this->fh, 0, "\t");
+        $data = explode("\t", fgets($this->fh));
         if (!isset($data[self::ID])) { return null; }
         if (!$data[self::POINT]) {
             $result = $this->stack[] = $data;
