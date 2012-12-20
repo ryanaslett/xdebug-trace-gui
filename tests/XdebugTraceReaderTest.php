@@ -57,9 +57,7 @@ class XdebugTraceReaderTest extends PHPUnit_Framework_TestCase {
 
     public function readFullFile($sut) {
         $result = array();
-        while ($result[] = $sut->next()) {
-            
-        }
+        while ($result[] = $sut->next()) {}
         return $result;
     }
 

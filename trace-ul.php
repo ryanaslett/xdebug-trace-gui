@@ -1,6 +1,7 @@
 <?php
 require 'trace.config.php';
 require_once "src/XdebugTraceReader.php";
+require_once "src/XdebugNestedCallsReader.php";
 require_once "src/XdebugTraceSummary.php";
 require_once "src/XdebugTraceOutputList.php";
 
@@ -91,6 +92,9 @@ use \XdebugTraceReader as Reader;
         if (isset($_GET["max_depth"])) {
             $maxDepth = $_GET["max_depth"];
         }
+        $nestedCalls = isset($_GET["start_with_call"]) 
+            ? $_GET["start_with_call"] 
+            : null;
 
         if (!isset($_GET ['file']) || empty($_GET ['file']))
         {
@@ -104,6 +108,9 @@ use \XdebugTraceReader as Reader;
         {
             echo '<div id="trace">';
             $reader = new Reader($traceFile, $maxDepth);
+            if (!is_null($nestedCalls)) {
+                $reader = new XdebugNestedCallsReader($reader, $nestedCalls);
+            }
             $summary = new Summary();
             $output = new XdebugTraceOutputList($timeJump, $memJump);
             
