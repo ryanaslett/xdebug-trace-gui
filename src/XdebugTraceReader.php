@@ -12,6 +12,7 @@ class XdebugTraceReader {
     const LINE = 9;
     const EXIT_TIME = 11;
     const EXIT_MEMORY = 12;
+    const DEFAULT_DEPTH = 4;
 
     private $stack = array();
     private $fh;
@@ -19,7 +20,7 @@ class XdebugTraceReader {
 
     public function __construct($file, $maxDepth = null) {
         $this->fh = fopen($file, 'r');
-        $this->maxDepth = $maxDepth ?: 4;
+        $this->maxDepth = $maxDepth ?: self::DEFAULT_DEPTH;
     }
 
     public function __destruct() {

@@ -3,7 +3,6 @@
 use \XdebugTraceReader as Reader;
 
 class XdebugTraceOutputList {
-    const BUFFER_LEVELS = 4;
     public function __construct($warnTimeJump = null, $warnMemoryJump = null) {
         $this->previousLevel = 0;
         $this->memJump = (float) $warnMemoryJump;
@@ -29,20 +28,10 @@ class XdebugTraceOutputList {
         }
 
         if ($data[Reader::LEVEL] > $this->previousLevel) {
-            if ($data[Reader::LEVEL] >= self::BUFFER_LEVELS) { ob_start(); }
             echo "<ul>\n"; 
         }
         elseif ($data[Reader::LEVEL] < $this->previousLevel) {
             echo "</ul>\n";
-            $dropNestedCalls = $data[Reader::LEVEL] >= self::BUFFER_LEVELS;
-            $flushNestedCalls = $data[Reader::LEVEL] >= self::BUFFER_LEVELS 
-                && ($memoryUsage > $memJump
-                    || $executionTime > $timeJump);
-            if ($flushNestedCalls) {
-                ob_end_flush();
-            } elseif ($dropNestedCalls) {
-                ob_end_clean();
-            }
         }
         $this->previousLevel = $data[Reader::LEVEL];
         echo $callInfo;

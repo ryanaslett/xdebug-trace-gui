@@ -48,8 +48,9 @@ use \XdebugTraceReader as Reader;
                 </select>
             </label>
 
-            <label>If the memory jumps <input type="text" name="memory" value="<?= @$_GET['memory'] ?: XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert and show nested calls</label>
-            <label>If the execution time jumps <input type="text" name="time" value="<?= @$_GET['time'] ?: XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert and show nested calls</label>
+            <label>If the memory jumps <input type="text" name="memory" value="<?= @$_GET['memory'] ?: XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert</label>
+            <label>If the execution time jumps <input type="text" name="time" value="<?= @$_GET['time'] ?: XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert</label>
+            <label>Maximum call stack depth to analyze <input type="text" name="max_depth" value="<?= @$_GET['max_depth'] ?: Reader::DEFAULT_DEPTH ?>"  style="text-align:right" size="5" /></label>
             <label>Sort calls by 
                 <select name="sort_by" id="sort_by"><option value="sortByCall">naturally</option>
                     <option value="sortByStats">time</option>
@@ -87,6 +88,9 @@ use \XdebugTraceReader as Reader;
         {
             $timeJump = (float) $_GET['time'];
         }
+        if (isset($_GET["max_depth"])) {
+            $maxDepth = $_GET["max_depth"];
+        }
 
         if (!isset($_GET ['file']) || empty($_GET ['file']))
         {
@@ -99,7 +103,7 @@ use \XdebugTraceReader as Reader;
         else
         {
             echo '<div id="trace">';
-            $reader = new Reader($traceFile);
+            $reader = new Reader($traceFile, $maxDepth);
             $summary = new Summary();
             $output = new XdebugTraceOutputList($timeJump, $memJump);
             
