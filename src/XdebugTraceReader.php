@@ -15,9 +15,11 @@ class XdebugTraceReader {
 
     private $stack = array();
     private $fh;
+    private $maxDepth;
 
-    public function __construct($file) {
+    public function __construct($file, $maxDepth = null) {
         $this->fh = fopen($file, 'r');
+        $this->maxDepth = $maxDepth ?: 4;
     }
 
     public function __destruct() {
@@ -36,8 +38,10 @@ class XdebugTraceReader {
      * @return array
      */
     public function next() {
-        $data = explode("\t", rtrim(fgets($this->fh)));
-        if (count($data) < 4) { return null; }
+        do {
+            $data = explode("\t", rtrim(fgets($this->fh)));
+            if (count($data) < 4) { return null; }
+        } while ($data[self::LEVEL] > $this->maxDepth);
         if (isset($data[self::POINT]) && $data[self::POINT] == "0") {
             $result = $this->stack[] = $data;
         } else {

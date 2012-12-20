@@ -41,8 +41,16 @@ class XdebugTraceReaderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("4.013765", $actual[3][XdebugTraceReader::EXIT_TIME]);
     }
 
-    private function getReaderFor($file) {
-        $reader = new XdebugTraceReader($file);
+    function testNextSkipsElementsDeeperThanMaxDepth() {
+        $sut = $this->getReaderFor("sample-trace.xt", 1);
+
+        $actual = $this->readFullFile($sut);
+
+        $this->assertCount(3, $actual);
+    }
+
+    private function getReaderFor($file, $maxDepth = null) {
+        $reader = new XdebugTraceReader($file, $maxDepth);
         $reader->init();
         return $reader;
     }
