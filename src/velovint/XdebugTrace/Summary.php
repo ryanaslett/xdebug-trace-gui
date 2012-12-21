@@ -1,7 +1,7 @@
 <?php
-use XdebugTraceReader as Reader;
+namespace velovint\XdebugTrace;
 
-class XdebugTraceSummary {
+class Summary {
     const NAME = 0;
     const TIMES = 1;
     const TOTAL_TIME = 2;
