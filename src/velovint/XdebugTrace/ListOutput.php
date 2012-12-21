@@ -20,7 +20,7 @@ class ListOutput {
             $warning = $executionTime > $this->timeJump
                 || $memoryUsage > $this->memJump;
             $callInfo = sprintf(
-                " <span class=\"stat%s\">%.3fms / %+.4f Mb</span></li>\n",
+                " <span class=\"stat%s\">%.3fms / %+.4f MiB</span></li>\n",
                 $warning ? " warning" : "",
                 $executionTime * 1000,
                 $memoryUsage / (1024 * 1024));

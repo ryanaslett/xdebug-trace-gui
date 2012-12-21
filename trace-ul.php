@@ -1,10 +1,9 @@
 <?php
 require 'trace.config.php';
 require_once "vendor/autoload.php";
-require_once "src/XdebugTraceSummary.php";
 
-use \XdebugTraceSummary as Summary;
-use \velovint\XdebugTrace\Reader as Reader;
+use velovint\XdebugTrace\Summary;
+use \velovint\XdebugTrace\Reader;
 use \velovint\XdebugTrace\ListOutput;
 
 ?>
@@ -14,6 +13,7 @@ use \velovint\XdebugTrace\ListOutput;
             @import url('trace.css');
         </style>
         <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script type="text/javascript" src="/jquery.tablesorter.min.js"></script>
         <title>Xdebug Trace File Parser</title>
     </head>
     <body>
@@ -116,27 +116,32 @@ use \velovint\XdebugTrace\ListOutput;
             $reader->init();
             while ($data = $reader->next())
             {
+                if ($data[Reader::POINT] == "1") { $summary->add($data); }
                 $output->printLine($data);
                 
             }
         }
             ?>
         <h2>Summary of function calls</h2>
-        <table>
+        <table id="summary">
+            <thead>
             <tr>
                <th>Function</th>
                <th>times</th>
-               <th>sum Time</th>
-               <th>sum Memory</th>
-               <th>avg Time</th>
-               <th>avg Memory</th>
+               <th>sum Time, ms</th>
+               <th>sum Memory, MiB</th>
+               <th>avg Time, ms</th>
+               <th>avg Memory, MiB</th>
             </tr>
+            </thead>
+            <tbody>
             <?php while ($data = $summary->next()) {
-                printf("<tr><td>%s</td><td>%d</td><td>%f</td><td>%f</td><td>%f</td><td>%f</td></tr>",
+                printf("<tr><td>%s</td><td>%d</td><td>%.3f</td><td>%+.4f</td><td>%.3f</td><td>%+.4f</td></tr>",
                     $data[Summary::NAME], $data[Summary::TIMES], 
-                    $data[Summary::TOTAL_TIME], $data[Summary::TOTAL_MEMORY], 
-                    $data[Summary::AVG_TIME], $data[Summary::AVG_MEMORY]);
+                    $data[Summary::TOTAL_TIME] * 1000, $data[Summary::TOTAL_MEMORY] / (1024 * 1024), 
+                    $data[Summary::AVG_TIME] * 1000, $data[Summary::AVG_MEMORY] / (1024 * 1024));
             } ?>
+            </tbody>
         </table>
              
     </div>
@@ -150,7 +155,8 @@ use \velovint\XdebugTrace\ListOutput;
                     list.sortedBy = sortBy;
                 }
                 list.toggle();
-            })
+            });
+            $("#summary").tablesorter();
         })
         function sortByStats(a, b) {
             return parseFloat($(b).children(".stat").text())
