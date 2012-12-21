@@ -1,6 +1,10 @@
 <?php
+namespace velovint\XdebugTrace;
 
-class XdebugTraceReader {
+/**
+ * @todo need to parse line, then filter nested calls and then filter depth
+ */
+class Reader {
 
     const LEVEL = 0;
     const ID = 1;
@@ -42,15 +46,15 @@ class XdebugTraceReader {
         do {
             $data = explode("\t", rtrim(fgets($this->fh)));
             if (count($data) < 4) { return null; }
+            if (isset($data[self::POINT]) && $data[self::POINT] == "0") {
+                $result = $this->stack[] = $data;
+            } else {
+                $result = array_pop($this->stack);
+                $result[self::POINT] = 1;
+                $result[self::EXIT_TIME] = $data[self::TIME];
+                $result[self::EXIT_MEMORY] = $data[self::MEMORY];
+            }
         } while ($data[self::LEVEL] > $this->maxDepth);
-        if (isset($data[self::POINT]) && $data[self::POINT] == "0") {
-            $result = $this->stack[] = $data;
-        } else {
-            $result = array_pop($this->stack);
-            $result[self::POINT] = 1;
-            $result[self::EXIT_TIME] = $data[self::TIME];
-            $result[self::EXIT_MEMORY] = $data[self::MEMORY];
-        }
         return $result;
     }
     

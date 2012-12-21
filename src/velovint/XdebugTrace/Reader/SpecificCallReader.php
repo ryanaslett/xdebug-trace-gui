@@ -1,13 +1,14 @@
 <?php
+namespace velovint\XdebugTrace\Reader;
 
-require_once "XdebugTraceReader.php";
+use velovint\XdebugTrace\Reader;
 
-class XdebugNestedCallsReader {
+class SpecificCallReader {
 
     private $isInTargetCall;
     private $leftTargetCall;
 
-    public function __construct(XdebugTraceReader $reader, $callId) {
+    public function __construct(Reader $reader, $callId) {
         $this->reader = $reader;
         $this->callId = $callId;
         $this->isInTargetCall = false;
@@ -23,10 +24,10 @@ class XdebugNestedCallsReader {
         do {
             $data = $this->reader->next();
             if (is_null($data)) { return; }
-        } while (!$this->isInTargetCall && $data[XdebugTraceReader::ID] != $this->callId);
-        if ($data[XdebugTraceReader::ID] == $this->callId) {
+        } while (!$this->isInTargetCall && $data[Reader::ID] != $this->callId);
+        if ($data[Reader::ID] == $this->callId) {
             $this->isInTargetCall = !$this->isInTargetCall;
-            if ($data[XdebugTraceReader::POINT] == "1") {
+            if ($data[Reader::POINT] == "1") {
                 $this->leftTargetCall = true;
             }
         }

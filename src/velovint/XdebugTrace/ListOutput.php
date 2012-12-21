@@ -1,8 +1,7 @@
 <?php
+namespace velovint\XdebugTrace;
 
-use \XdebugTraceReader as Reader;
-
-class XdebugTraceOutputList {
+class ListOutput {
     public function __construct($warnTimeJump = null, $warnMemoryJump = null) {
         $this->previousLevel = 0;
         $this->memJump = (float) $warnMemoryJump;

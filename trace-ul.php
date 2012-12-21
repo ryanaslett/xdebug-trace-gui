@@ -1,12 +1,11 @@
 <?php
 require 'trace.config.php';
-require_once "src/XdebugTraceReader.php";
-require_once "src/XdebugNestedCallsReader.php";
+require_once "vendor/autoload.php";
 require_once "src/XdebugTraceSummary.php";
-require_once "src/XdebugTraceOutputList.php";
 
 use \XdebugTraceSummary as Summary;
-use \XdebugTraceReader as Reader;
+use \velovint\XdebugTrace\Reader as Reader;
+use \velovint\XdebugTrace\ListOutput;
 
 ?>
 <html>
@@ -109,10 +108,10 @@ use \XdebugTraceReader as Reader;
             echo '<div id="trace">';
             $reader = new Reader($traceFile, $maxDepth);
             if (!is_null($nestedCalls)) {
-                $reader = new XdebugNestedCallsReader($reader, $nestedCalls);
+                $reader = new SpecificCallReader($reader, $nestedCalls);
             }
             $summary = new Summary();
-            $output = new XdebugTraceOutputList($timeJump, $memJump);
+            $output = new ListOutput($timeJump, $memJump);
             
             $reader->init();
             while ($data = $reader->next())

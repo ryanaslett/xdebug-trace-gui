@@ -1,12 +1,13 @@
 <?php
+namespace velovint\XdebugTrace\Reader;
 
-require_once "../src/XdebugNestedCallsReader.php";
+use velovint\XdebugTrace\Reader;
 
-class XdebugNestedCallsReaderTest extends PHPUnit_Framework_TestCase {
+class SpecificCallReaderTest extends \PHPUnit_Framework_TestCase {
 
     function testNextReadsOnlyNestedCallsOnOneLevel() {
-        $reader = $this->getReaderFor("sample-trace.xt");
-        $sut = new XdebugNestedCallsReader($reader, 1);
+        $reader = $this->getReaderFor("tests/velovint/XdebugTrace/sample-trace.xt");
+        $sut = new SpecificCallReader($reader, 1);
 
         $actual = $this->readFullFile($sut);
 
@@ -14,8 +15,8 @@ class XdebugNestedCallsReaderTest extends PHPUnit_Framework_TestCase {
     }
 
     function testNextReadsOnlyNestedCallsOnMultipleLevels() {
-        $reader = $this->getReaderFor("sample-trace.xt");
-        $sut = new XdebugNestedCallsReader($reader, 0);
+        $reader = $this->getReaderFor("tests/velovint/XdebugTrace/sample-trace.xt");
+        $sut = new SpecificCallReader($reader, 0);
 
         $actual = $this->readFullFile($sut);
 
@@ -23,7 +24,7 @@ class XdebugNestedCallsReaderTest extends PHPUnit_Framework_TestCase {
     }
 
     private function getReaderFor($file, $maxDepth = null) {
-        $reader = new XdebugTraceReader($file, $maxDepth);
+        $reader = new Reader($file, $maxDepth);
         $reader->init();
         return $reader;
     }
