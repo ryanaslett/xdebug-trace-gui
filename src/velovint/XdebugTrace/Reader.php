@@ -45,7 +45,22 @@ class Reader {
     public function next() {
         do {
             $data = explode("\t", rtrim(fgets($this->fh)));
-            if (count($data) < 4) { return null; }
+            if (count($data) < 4) {
+                return null;
+            }
+            if ($data[self::LEVEL] > $this->maxDepth) {
+                /**
+                 * we can move forward at least number of lines = the difference
+                 * of current and max levels -1 if that's exit point
+                 */
+                $moveForwardLines = $data[self::LEVEL] - $this->maxDepth
+                    - $data[self::POINT];
+                for ($x = 0; $x < $moveForwardLines; $x++) {
+                    fgets($this->fh);
+                }
+                continue;
+            }
+
             if (isset($data[self::POINT]) && $data[self::POINT] == "0") {
                 $result = $this->stack[] = $data;
             } else {

@@ -2,9 +2,10 @@
 require 'trace.config.php';
 require_once "vendor/autoload.php";
 
-use velovint\XdebugTrace\Summary;
+use \velovint\XdebugTrace\Summary;
 use \velovint\XdebugTrace\Reader;
 use \velovint\XdebugTrace\ListOutput;
+use \velovint\XdebugTrace\Reader\SpecificCallReader;
 
 ?>
 <html>
@@ -60,15 +61,11 @@ use \velovint\XdebugTrace\ListOutput;
 
         </form>
 
-        <br /><a href="#sumary">Resum</a>
         <?php
         if (!isset($_GET['file']))
         {
             exit;
         }
-        ?>
-        <h2>Output</h2>
-        <?php
         /**
          * retrieve the xdebug.trace_format ini set.
          */
@@ -105,7 +102,7 @@ use \velovint\XdebugTrace\ListOutput;
         }
         else
         {
-            echo '<div id="trace">';
+            echo '<h2>Call Trace</h2><div id="trace">';
             $reader = new Reader($traceFile, $maxDepth);
             if (!is_null($nestedCalls)) {
                 $reader = new SpecificCallReader($reader, $nestedCalls);
@@ -120,6 +117,7 @@ use \velovint\XdebugTrace\ListOutput;
                 $output->printLine($data);
                 
             }
+            echo "</div>";
         }
             ?>
         <h2>Summary of function calls</h2>
