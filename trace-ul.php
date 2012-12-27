@@ -147,10 +147,14 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
         $(document).ready(function() {
             $('#trace>ul').click(function(event) {
                 list = $(event.target).children("ul");
-                var sortBy = $('#sort_by').val();
-                if (list.is(":hidden") && list.sortedBy != sortBy) {
+                var sortBy = $("#sort_by").val();
+                if (list.attr("sortedBy") == undefined) {
+                    list.attr("sortedBy", "sortByCall");
+                }
+                if (list.is(":hidden") && list.attr("sortedBy") != sortBy) {
+                    alert(sortBy);
                     list.children("li").sort(window[sortBy]).appendTo(list);
-                    list.sortedBy = sortBy;
+                    list.attr("sortedBy", sortBy);
                 }
                 list.toggle();
             });
