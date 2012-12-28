@@ -25,14 +25,6 @@ class Reader {
         return $this->fh;
     }
 
-    public function getMemoryUsage($out) {
-        return $out[Frame::EXIT_MEMORY] - $out[Frame::MEMORY];
-    }
-
-    public function getExecutionTime($out) {
-        return $out[Frame::EXIT_TIME] - $out[Frame::TIME];
-    }
-
     /**
      * @return array
      */

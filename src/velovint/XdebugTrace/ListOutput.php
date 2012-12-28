@@ -15,8 +15,8 @@ class ListOutput {
                 "{$data[Frame::NAME]}() {$data[Frame::FILENAME]}:" .
                 "{$data[Frame::LINE]}";
         } else {
-            $executionTime = Reader::getExecutionTime($data);
-            $memoryUsage = Reader::getMemoryUsage($data);
+            $executionTime = Frame::getExecutionTime($data);
+            $memoryUsage = Frame::getMemoryUsage($data);
             $warning = $executionTime > $this->timeJump
                 || $memoryUsage > $this->memJump;
             $callInfo = sprintf(
