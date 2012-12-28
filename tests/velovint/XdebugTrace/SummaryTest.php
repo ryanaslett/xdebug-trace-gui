@@ -40,8 +40,8 @@ class SummaryTest extends \PHPUnit_Framework_TestCase {
     public function testNextAddsCallSummary() {
         $sampleTrace = $this->getSampleTrace();
         $this->sut->add($sampleTrace);
-        $sampleTrace[Reader::EXIT_TIME] = "0.13";
-        $sampleTrace[Reader::EXIT_MEMORY] = "1600";
+        $sampleTrace[Frame::EXIT_TIME] = "0.13";
+        $sampleTrace[Frame::EXIT_MEMORY] = "1600";
         $this->sut->add($sampleTrace);
         $expected = array(
             Summary::NAME => "myFunction",
@@ -59,11 +59,11 @@ class SummaryTest extends \PHPUnit_Framework_TestCase {
 
     private function getSampleTrace() {
         return array(
-            Reader::NAME => "myFunction",
-            Reader::TIME => "0.1",
-            Reader::EXIT_TIME => "0.11",
-            Reader::MEMORY => "1000",
-            Reader::EXIT_MEMORY => "1500"
+            Frame::NAME => "myFunction",
+            Frame::TIME => "0.1",
+            Frame::EXIT_TIME => "0.11",
+            Frame::MEMORY => "1000",
+            Frame::EXIT_MEMORY => "1500"
         );
     }
 

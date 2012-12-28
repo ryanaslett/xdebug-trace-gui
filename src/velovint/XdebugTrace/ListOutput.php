@@ -9,11 +9,11 @@ class ListOutput {
     }
 
     public function printLine($data) {
-        if (!$data[Reader::POINT]) {
+        if (!$data[Frame::POINT]) {
             $executionTime = $memoryUsage = 0;
-            $callInfo = "<li id=\"call{$data[Reader::ID]}\">" .
-                "{$data[Reader::NAME]}() {$data[Reader::FILENAME]}:" .
-                "{$data[Reader::LINE]}";
+            $callInfo = "<li id=\"call{$data[Frame::ID]}\">" .
+                "{$data[Frame::NAME]}() {$data[Frame::FILENAME]}:" .
+                "{$data[Frame::LINE]}";
         } else {
             $executionTime = Reader::getExecutionTime($data);
             $memoryUsage = Reader::getMemoryUsage($data);
@@ -26,13 +26,13 @@ class ListOutput {
                 $memoryUsage / (1024 * 1024));
         }
 
-        if ($data[Reader::LEVEL] > $this->previousLevel) {
+        if ($data[Frame::LEVEL] > $this->previousLevel) {
             echo "<ul>\n"; 
         }
-        elseif ($data[Reader::LEVEL] < $this->previousLevel) {
+        elseif ($data[Frame::LEVEL] < $this->previousLevel) {
             echo "</ul>\n";
         }
-        $this->previousLevel = $data[Reader::LEVEL];
+        $this->previousLevel = $data[Frame::LEVEL];
         echo $callInfo;
     }
 }

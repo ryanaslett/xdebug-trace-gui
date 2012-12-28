@@ -12,11 +12,11 @@ class Summary {
     private $summary = array();
     
     public function add($data) {
-        if (!isset($data[Reader::NAME])) { return; }
-        $index = $data[Reader::NAME];
+        if (!isset($data[Frame::NAME])) { return; }
+        $index = $data[Frame::NAME];
         if (!isset($this->summary[$index])) {
             $this->summary[$index] = array(
-                self::NAME => $data[Reader::NAME],
+                self::NAME => $data[Frame::NAME],
                 self::TIMES => 0,
                 self::TOTAL_TIME => 0,
                 self::TOTAL_MEMORY => 0,
@@ -25,11 +25,11 @@ class Summary {
         }
         $s =& $this->summary[$index];
         /**see Incremental Average Algorithm http://jvminside.blogspot.com/2010/01/incremental-average-calculation.html */
-        $executionTime = $data[Reader::EXIT_TIME] - $data[Reader::TIME];
+        $executionTime = $data[Frame::EXIT_TIME] - $data[Frame::TIME];
         $s[self::AVG_TIME] = (($executionTime - $s[self::AVG_TIME]) / ($s[self::TIMES] + 1)) 
             + $s[self::AVG_TIME];
         $s[self::TOTAL_TIME] += $executionTime;
-        $memoryUsage = $data[Reader::EXIT_MEMORY] - $data[Reader::MEMORY];
+        $memoryUsage = $data[Frame::EXIT_MEMORY] - $data[Frame::MEMORY];
         $s[self::AVG_MEMORY] = (($memoryUsage - $s[self::AVG_MEMORY]) / ($s[self::TIMES] + 1))
             + $s[self::AVG_MEMORY];
         $s[self::TOTAL_MEMORY] += $memoryUsage;

@@ -2,7 +2,8 @@
 
 namespace velovint\XdebugTrace\Reader;
 
-use velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Frame;
 
 class SpecificCallReaderTest extends \PHPUnit_Framework_TestCase {
 
@@ -15,7 +16,7 @@ class SpecificCallReaderTest extends \PHPUnit_Framework_TestCase {
 
         $actual = $sut->next();
 
-        $this->assertEquals($frameId, $actual[Reader::ID]);
+        $this->assertEquals($frameId, $actual[Frame::ID]);
     }
 
     function testNextReadsAllNestedCalls() {

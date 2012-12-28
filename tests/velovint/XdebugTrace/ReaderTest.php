@@ -26,9 +26,9 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
         $actual = $this->readFullFile($sut);
 
-        $this->assertEquals("dirname", $actual[2][Reader::NAME]);
-        $this->assertEquals("321852", $actual[2][Reader::EXIT_MEMORY]);
-        $this->assertEquals("0.000365", $actual[2][Reader::EXIT_TIME]);
+        $this->assertEquals("dirname", $actual[2][Frame::NAME]);
+        $this->assertEquals("321852", $actual[2][Frame::EXIT_MEMORY]);
+        $this->assertEquals("0.000365", $actual[2][Frame::EXIT_TIME]);
     }
 
     function testNextAppendsStatsOnExitForMain() {
@@ -36,8 +36,8 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
         $actual = array_pop($this->readFullFile($sut));
 
-        $this->assertEquals("11712", $actual[Reader::EXIT_MEMORY]);
-        $this->assertEquals("4.013765", $actual[Reader::EXIT_TIME]);
+        $this->assertEquals("11712", $actual[Frame::EXIT_MEMORY]);
+        $this->assertEquals("4.013765", $actual[Frame::EXIT_TIME]);
     }
 
     function testNextSkipsElementsDeeperThanMaxDepth() {

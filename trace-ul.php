@@ -4,6 +4,7 @@ require_once "vendor/autoload.php";
 
 use \velovint\XdebugTrace\Summary;
 use \velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Frame;
 use \velovint\XdebugTrace\ListOutput;
 use \velovint\XdebugTrace\Reader\SpecificCallReader;
 
@@ -113,7 +114,7 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
             $reader->init();
             while ($data = $reader->next())
             {
-                if ($data[Reader::POINT] == "1") { $summary->add($data); }
+                if ($data[Frame::POINT] == "1") { $summary->add($data); }
                 $output->printLine($data);
                 
             }

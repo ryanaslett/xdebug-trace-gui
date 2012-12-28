@@ -1,13 +1,16 @@
 <?php
+
 namespace velovint\XdebugTrace\Reader;
 
-use velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Frame;
 
 class SpecificCallReader {
 
     private $callId;
     private $isInTargetCall;
     private $leftTargetCall;
+
     /** @var Reader */
     private $reader;
 
@@ -28,24 +31,27 @@ class SpecificCallReader {
         $fp = $this->reader->getFileHandler();
         do {
             $data = explode("\t", $line = fgets($fp));
-            echo "{$data[Reader::ID]} - {$data[Reader::POINT]} \n";
-            $moveForwardLines = $target - $data[Reader::ID] - 1;
+            $moveForwardLines = $target - $data[Frame::ID] - 1;
             for ($x = 0; $x < $moveForwardLines; $x++) {
                 fgets($fp);
             }
-        } while (!feof($fp) && $data[Reader::ID] != $target);
+        } while (!feof($fp) && $data[Frame::ID] != $target);
         fseek($fp, strlen($line) * -1, SEEK_CUR);
     }
 
     public function next() {
-        if ($this->leftTargetCall) { return; }
+        if ($this->leftTargetCall) {
+            return;
+        }
         do {
             $data = $this->reader->next();
-            if (is_null($data)) { return; }
-        } while (!$this->isInTargetCall && $data[Reader::ID] != $this->callId);
-        if ($data[Reader::ID] == $this->callId) {
+            if (is_null($data)) {
+                return;
+            }
+        } while (!$this->isInTargetCall && $data[Frame::ID] != $this->callId);
+        if ($data[Frame::ID] == $this->callId) {
             $this->isInTargetCall = !$this->isInTargetCall;
-            if ($data[Reader::POINT] == "1") {
+            if ($data[Frame::POINT] == "1") {
                 $this->leftTargetCall = true;
             }
         }
