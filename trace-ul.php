@@ -152,7 +152,6 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
                     list.attr("sortedBy", "sortByCall");
                 }
                 if (list.is(":hidden") && list.attr("sortedBy") != sortBy) {
-                    alert(sortBy);
                     list.children("li").sort(window[sortBy]).appendTo(list);
                     list.attr("sortedBy", sortBy);
                 }
