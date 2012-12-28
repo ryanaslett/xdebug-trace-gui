@@ -30,11 +30,15 @@ class Reader {
     public function __destruct() {
         fclose($this->fh);
     }
-    
+
+    public function getFileHandler() {
+        return $this->fh;
+    }
+
     public function getMemoryUsage($out) {
         return $out[self::EXIT_MEMORY] - $out[self::MEMORY];
     }
-    
+
     public function getExecutionTime($out) {
         return $out[self::EXIT_TIME] - $out[self::TIME];
     }

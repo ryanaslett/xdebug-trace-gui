@@ -8,7 +8,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
         
         $data = $this->readFullFile($sut);
 
-        $this->assertCount(5, $data);
+        $this->assertCount(10, $data);
     }
 
     public function testNextParsesEntryPoint() {
@@ -26,6 +26,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
         $actual = $this->readFullFile($sut);
 
+        $this->assertEquals("dirname", $actual[2][Reader::NAME]);
         $this->assertEquals("321852", $actual[2][Reader::EXIT_MEMORY]);
         $this->assertEquals("0.000365", $actual[2][Reader::EXIT_TIME]);
     }
@@ -33,10 +34,10 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
     function testNextAppendsStatsOnExitForMain() {
         $sut = $this->getReaderFor("tests/velovint/XdebugTrace/sample-trace.xt");
 
-        $actual = $this->readFullFile($sut);
+        $actual = array_pop($this->readFullFile($sut));
 
-        $this->assertEquals("11712", $actual[3][Reader::EXIT_MEMORY]);
-        $this->assertEquals("4.013765", $actual[3][Reader::EXIT_TIME]);
+        $this->assertEquals("11712", $actual[Reader::EXIT_MEMORY]);
+        $this->assertEquals("4.013765", $actual[Reader::EXIT_TIME]);
     }
 
     function testNextSkipsElementsDeeperThanMaxDepth() {
@@ -44,7 +45,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
         $actual = $this->readFullFile($sut);
 
-        $this->assertCount(3, $actual);
+        $this->assertCount(2, $actual);
     }
 
     private function getReaderFor($file, $maxDepth = null) {
@@ -55,7 +56,9 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
     public function readFullFile($sut) {
         $result = array();
-        while ($result[] = $sut->next()) {}
+        while ($record = $sut->next()) {
+            $result[] = $record;
+        }
         return $result;
     }
 
