@@ -26,25 +26,21 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
                 <select name="file">
                     <option value=""> -- Select -- </option>
                     <?php
+                    $traceFile = isset($_GET["file"])  && !empty($_GET["file"])
+                        ? $config['directory'] . '/' . $_GET ['file']
+                        : null;
                     $files = new DirectoryIterator($config['directory']);
-                    foreach ($files as $file)
-                    {
-
-                        if (substr_count($file->getFilename(), '.xt') == 0 || in_array($config['directory'] . '/' . $file->getFilename(),
-                                                                                       $ownTraces))
-                        {
-                            continue;
-                        }
-
-                        $date = explode('.', $file->getFilename());
-                        $date = date('Y-m-d H:i:s', $file->getCTime());
-
-
-                        echo '<option value="' . $file->getFilename() . '"'
-                            . (isset($_GET['file']) && $file->getFileName() == $_GET['file'] ? ' selected="selected"' : '')
-                            . '> ' . $date . ' - ' . $file->getFilename() . '- ' 
-                            . number_format($file->getSize() / 1024, 0, ',', '.') 
-                            . ' KB</option>' . PHP_EOL;
+                    foreach ($files as $file) {
+                        /* @var $file DirectoryIterator */
+                        $extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+                        if ($extension != "xt") { continue; }
+                        printf('<option value="%s"%s>%s - %s - %s KB</option>',
+                            $file->getFilename(),
+                            ($traceFile == $file->getFileName()) ? ' selected="selected"' : '',
+                            date('Y-m-d H:i:s', $file->getCTime()),
+                            $file->getFilename(),
+                            number_format($file->getSize() / 1024, 0, ',', '.')
+                        );
                     }
                     ?>
                 </select>
@@ -63,46 +59,19 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
         </form>
 
         <?php
-        if (!isset($_GET['file']))
-        {
-            exit;
-        }
-        /**
-         * retrieve the xdebug.trace_format ini set.
-         */
-        $XDEBUG_TRACE_GUI_CUSTOM_NAMESPACE_LEN = strlen(XDEBUG_TRACE_GUI_CUSTOM_NAMESPACE);
-
-        $traceFile = $config['directory'] . '/' . $_GET ['file'];
-
-
-        $memJump = 1000000;
-        if (isset($_GET['memory']))
-        {
-            $memJump = (float) $_GET['memory'] * 1000000;
-        }
-
-        $timeJump = 1;
-        if (isset($_GET['time']))
-        {
-            $timeJump = (float) $_GET['time'];
-        }
-        if (isset($_GET["max_depth"])) {
-            $maxDepth = $_GET["max_depth"];
-        }
+        $memJump = isset($_GET['memory'])
+            ? (float) $_GET['memory'] * 1000000
+            : 1000000;
+        $timeJump =  isset($_GET['time']) ? (float) $_GET['time'] : 1;
+        $maxDepth = isset($_GET["max_depth"]) ? $_GET["max_depth"] : null;
         $nestedCalls = isset($_GET["start_with_call"]) 
             ? $_GET["start_with_call"] 
             : null;
 
-        if (!isset($_GET ['file']) || empty($_GET ['file']))
-        {
-            echo '<p>No file selected</p>';
+        if (!is_null($traceFile) && !is_readable($traceFile)) {
+            echo "Cat' read $traceFile";
         }
-        else if (!file_exists($traceFile))
-        {
-            echo '<p>Invalid file</p>';
-        }
-        else
-        {
+        elseif (!is_null($traceFile)) {
             echo '<h2>Call Trace</h2><div id="trace">';
             $reader = new Reader($traceFile, $maxDepth);
             if (!is_null($nestedCalls)) {
@@ -119,7 +88,6 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
                 
             }
             echo "</div>";
-        }
             ?>
         <h2>Summary of function calls</h2>
         <table id="summary">
@@ -142,8 +110,8 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
             } ?>
             </tbody>
         </table>
+        <?php } ?>
              
-    </div>
     <script type="text/javascript">
         $(document).ready(function() {
             $('#trace>ul').click(function(event) {
