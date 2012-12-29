@@ -1,6 +1,6 @@
 <?php
-require 'trace.config.php';
-require_once "vendor/autoload.php";
+require '../trace.config.php';
+require_once "../vendor/autoload.php";
 
 use \velovint\XdebugTrace\Summary;
 use \velovint\XdebugTrace\Reader;
