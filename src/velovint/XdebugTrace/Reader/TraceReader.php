@@ -1,10 +1,10 @@
 <?php
-namespace velovint\XdebugTrace;
+namespace velovint\XdebugTrace\Reader;
 
-/**
- * @todo need to parse line, then filter nested calls and then filter depth
- */
-class Reader {
+use \velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Frame;
+
+class TraceReader implements Reader {
 
     const DEFAULT_DEPTH = 4;
 

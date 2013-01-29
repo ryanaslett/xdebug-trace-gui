@@ -2,7 +2,7 @@
 
 namespace velovint\XdebugTrace\Reader;
 
-use \velovint\XdebugTrace\Reader;
+use \velovint\XdebugTrace\Reader\TraceReader;
 use \velovint\XdebugTrace\Frame;
 
 class SpecificCallReaderTest extends \PHPUnit_Framework_TestCase {
@@ -35,7 +35,7 @@ class SpecificCallReaderTest extends \PHPUnit_Framework_TestCase {
     }
 
     private function getReaderFor($file, $callId) {
-        $reader = new SpecificCallReader(new Reader($file), $callId);
+        $reader = new SpecificCallReader(new TraceReader($file), $callId);
         $reader->init();
         return $reader;
     }

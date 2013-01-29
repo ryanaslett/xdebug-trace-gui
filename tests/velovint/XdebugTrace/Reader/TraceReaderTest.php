@@ -1,7 +1,9 @@
 <?php
-namespace velovint\XdebugTrace;
+namespace velovint\XdebugTrace\Reader;
 
-class ReaderTest extends \PHPUnit_Framework_TestCase {
+use \velovint\XdebugTrace\Frame;
+
+class TraceReaderTest extends \PHPUnit_Framework_TestCase {
     
     public function testNextReadsEntireTraceFile() {
         $sut = $this->getReaderFor("tests/velovint/XdebugTrace/sample-trace.xt");
@@ -49,7 +51,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
     }
 
     private function getReaderFor($file, $maxDepth = null) {
-        $reader = new Reader($file, $maxDepth);
+        $reader = new TraceReader($file, $maxDepth);
         $reader->init();
         return $reader;
     }
