@@ -3,9 +3,9 @@ require '../trace.config.php';
 require_once "../vendor/autoload.php";
 
 use \velovint\XdebugTrace\Summary;
-use \velovint\XdebugTrace\Reader;
 use \velovint\XdebugTrace\Frame;
 use \velovint\XdebugTrace\ListOutput;
+use \velovint\XdebugTrace\Reader\TraceReader;
 use \velovint\XdebugTrace\Reader\SpecificCallReader;
 
 ?>
@@ -48,7 +48,7 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
 
             <label>If the memory jumps <input type="text" name="memory" value="<?= @$_GET['memory'] ?: XDEBUG_TRACE_GUI_MEMORY_TRIGGER ?>" style="text-align:right" size="5"/> MB, provide an alert</label>
             <label>If the execution time jumps <input type="text" name="time" value="<?= @$_GET['time'] ?: XDEBUG_TRACE_GUI_TIME_TRIGGER ?>" style="text-align:right" size="5"/> seconds, provide an alert</label>
-            <label>Maximum call stack depth to analyze <input type="text" name="max_depth" value="<?= @$_GET['max_depth'] ?: Reader::DEFAULT_DEPTH ?>"  style="text-align:right" size="5" /></label>
+            <label>Maximum call stack depth to analyze <input type="text" name="max_depth" value="<?= @$_GET['max_depth'] ?: TraceReader::DEFAULT_DEPTH ?>"  style="text-align:right" size="5" /></label>
             <label>Sort calls by 
                 <select name="sort_by" id="sort_by"><option value="sortByCall">naturally</option>
                     <option value="sortByStats">time</option>
@@ -73,7 +73,7 @@ use \velovint\XdebugTrace\Reader\SpecificCallReader;
         }
         elseif (!is_null($traceFile)) {
             echo '<h2>Call Trace</h2><div id="trace">';
-            $reader = new Reader($traceFile, $maxDepth);
+            $reader = new TraceReader($traceFile, $maxDepth);
             if (!is_null($nestedCalls)) {
                 $reader = new SpecificCallReader($reader, $nestedCalls);
             }
